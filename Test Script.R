@@ -1,0 +1,68 @@
+library(tidyverse)
+
+game = array(c(3,10,12,4,15,17,7,6,10,4,4,8), dim = c(2,3,2))
+game = array(c(0,0,1,1,0,0,7,6,10,4,4,8), dim = c(2,3,2))
+
+
+game = makegame(7,5)
+
+IEDSresult = IEDS(game)
+
+#IEDS animation: color row/column bright red + green for dominated + dominant rows/columns. Then bright green fade back to normal and bright red fade to dark red.
+
+dominated = IEDSresult[[1]]
+dominators = IEDSresult[[2]]
+game
+game[-dominated[[1]], -dominated[[2]],]
+
+
+BRAresult = BRA(game, dominated)
+p1BRs = BRAresult[[1]]
+p2BRs = BRAresult[[2]]
+remain1 = BRAresult[[3]]
+remain2 = BRAresult[[4]]
+elim1 = BRAresult[[5]]
+elim2 = BRAresult[[6]]
+
+NE = FindPureNE(game, p1BRs, p2BRs, remain2)
+
+if(length(remain1)==2 & length(remain2)==2){
+  MixedNE = Find2x2MixedNE(game, remain1, remain2)
+  MixedNE
+  NE = c(NE,MixedNE)
+}
+
+
+
+NE
+
+
+#in Nx2 games | 2xN games
+MixedNE = list()
+if (length(remain1) == 2 & length(remain2) > 2){
+  #Player 2 with more than 2 strategies remaining.
+  n = length(remain2)
+  for(i in 1:(n-1)){
+    for(j in (i+1):n){
+      if(!all(p1BRs[[i]] == p1BRs[[j]]) | (length(p1BRs[[i]])+length(p1BRs[[j]])) == 4){
+        
+        MixedNE[[length(MixedNE)+1]] = Find2x2MixedNE(game, remain1, c(remain2[i],remain2[j]))
+      }
+    }
+  }
+}
+
+if (length(remain1) > 2 & length(remain2) == 2){
+  #Player 1 with more than 2 strategies remaining.
+  n = length(remain1)
+  for(i in 1:(n-1)){
+    for(j in (i+1):n){
+      if(!all(p2BRs[[i]] == p2BRs[[j]]) | (length(p2BRs[[i]])+length(p2BRs[[j]])) == 4){
+        MixedNE[[length(MixedNE)+1]] = Find2x2MixedNE(game, c(remain1[i], remain1[j]), remain2)
+      }
+    }
+  }
+}
+
+
+MixedNE
