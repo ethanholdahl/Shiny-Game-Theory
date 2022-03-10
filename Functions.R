@@ -1,4 +1,4 @@
-makegame = function(S1, S2){
+makegame = function(S1, S2) {
   #This function creates a 3-dimensional array meant to represent payoffs in a 2 player S1 by S2 normal form game.
   
   #Name strategies
@@ -8,7 +8,11 @@ makegame = function(S1, S2){
   
   #Randomly generate payoffs, create payoff array (game table).
   payoffs = sample(-10:20, (S1 * S2 * 2), replace = TRUE)
-  game = array(payoffs, dim = c(S1, S2, 2), dimnames = list(player1strats,player2strats,players))
+  game = array(
+    payoffs,
+    dim = c(S1, S2, 2),
+    dimnames = list(player1strats, player2strats, players)
+  )
   return(game)
 }
 
@@ -47,7 +51,7 @@ IEDS = function(game) {
           next
         }
         #check if s1 dominates s2
-        if (all(game[s1, -dominated[[2]], 1] > game[s2, -dominated[[2]], 1])) {
+        if (all(game[s1,-dominated[[2]], 1] > game[s2,-dominated[[2]], 1])) {
           #record domination
           dominated[[1]] = c(dominated[[1]], s2)
           dominators[[1]] = c(dominators[[1]], s1)
@@ -55,7 +59,7 @@ IEDS = function(game) {
           finish = FALSE
         }
         #check if s2 dominates s1
-        if (all(game[s1, -dominated[[2]], 1] < game[s2, -dominated[[2]], 1])) {
+        if (all(game[s1,-dominated[[2]], 1] < game[s2,-dominated[[2]], 1])) {
           #record domination
           dominated[[1]] = c(dominated[[1]], s1)
           dominators[[1]] = c(dominators[[1]], s2)
@@ -113,20 +117,20 @@ IEDS = function(game) {
 }
 
 
-BRA = function(game, dominated){
+BRA = function(game, dominated) {
   #This function preforms best response analysis on the remaining strategies in the game.
   #It's inputs are the game being analyzed and the strategies dominated by IEDS
-  #The output of this function are lists of the best response correspondance for each player as well as lists of remaining strategies and lists of eliminated strategies. 
+  #The output of this function are lists of the best response correspondance for each player as well as lists of remaining strategies and lists of eliminated strategies.
   
-  #retrieve the list of strategies available to each player 
+  #retrieve the list of strategies available to each player
   S1 = 1:dim(game)[1]
   S2 = 1:dim(game)[2]
   
   #create list of eliminated strategies by IEDS
-  elim1 = dominated[[1]][dominated[[1]]<100]
-  elim2 = dominated[[2]][dominated[[2]]<100]
+  elim1 = dominated[[1]][dominated[[1]] < 100]
+  elim2 = dominated[[2]][dominated[[2]] < 100]
   
-  #identify strategies remaining after IEDS 
+  #identify strategies remaining after IEDS
   remain1 = S1[!S1 %in% elim1]
   remain2 = S2[!S2 %in% elim2]
   
@@ -134,18 +138,18 @@ BRA = function(game, dominated){
   #initiate BR list
   p1BRs = list()
   
-  for(s in remain2){
-    brval = max(game[remain1,s,1])
-    p1BRs[[s]] = remain1[brval == game[remain1,s,1]]
+  for (s in remain2) {
+    brval = max(game[remain1, s, 1])
+    p1BRs[[s]] = remain1[brval == game[remain1, s, 1]]
   }
   
   #Player 2 BRs
   #initiate BR list
   p2BRs = list()
   
-  for(s in remain1){
-    brval = max(game[s,remain2,2])
-    p2BRs[[s]] = remain2[brval == game[s,remain2,2]]
+  for (s in remain1) {
+    brval = max(game[s, remain2, 2])
+    p2BRs[[s]] = remain2[brval == game[s, remain2, 2]]
   }
   returnlist = list(p1BRs, p2BRs, remain1, remain2, elim1, elim2)
   names(returnlist) = c("p1BRs", "p2BRs", "remain1", "remain2", "elim1", "elim2")
@@ -153,17 +157,17 @@ BRA = function(game, dominated){
 }
 
 
-FindPureNE = function(game, p1BRs, p2BRs, remain2){
+FindPureNE = function(game, p1BRs, p2BRs, remain2) {
   #This function finds and returns a list of all pure strategy NE in a game
   #Inputs are the original game, best response correspondences, and a list of remaining strategies for player 2.
   
   #create empty list for Nash Eeuilibrias
   NE = list()
-  for(s in remain2){
-    for(strats1 in p1BRs[[s]]){
-      for(strats2 in p2BRs[[strats1]]){
+  for (s in remain2) {
+    for (strats1 in p1BRs[[s]]) {
+      for (strats2 in p2BRs[[strats1]]) {
         #Check if best response to the best response to s is indeed s (a Nash Equilibrium).
-        if(strats2 == s){
+        if (strats2 == s) {
           #Pure strategy NE reached at strats1, strats2.
           #Create vector form strategy for player 1 and player 2
           s1 = 1:dim(game)[1]
@@ -175,7 +179,7 @@ FindPureNE = function(game, p1BRs, p2BRs, remain2){
           s1[strats1] = 1
           s2[strats2] = 1
           #Add to list of NEs
-          NE[[length(NE)+1]] = list(s1, s2)
+          NE[[length(NE) + 1]] = list(s1, s2)
         }
       }
     }
@@ -211,57 +215,75 @@ Find2x2MixedNE = function(game, remain1, remain2) {
     
     #check for any NaNs (the case where one player is always indifferent) and correct by substituting "P And/Or Q"
     #assign probabilities to remaining pure strategies
-    if(is.nan(q)){
+    if (is.nan(q)) {
       s1[remain1][1] = "q"
       s1[remain1][2] = "1 - q"
     } else {
       s1[remain1][1] = q
       s1[remain1][2] = 1 - q
     }
-    if(is.nan(p)){
+    if (is.nan(p)) {
       s2[remain2][1] = "p"
       s2[remain2][2] = "1 - p"
     } else {
       s2[remain2][1] = p
       s2[remain2][2] = 1 - p
     }
-
+    
     #return the mixed NE as a list
     return(list(s1, s2))
   }
 }
 
 
-FindNx2MixedNE = function(game, remain1, remain2, p1BRs, p2BRs){
+FindNx2MixedNE = function(game, remain1, remain2, p1BRs, p2BRs) {
   #This function finds and returns a list of the 2x2 mixed strategy Nash Equilibrium from this Nx2 or 2xN game (if it exists)
-  #Possible m>2 x 2 mixed strategy Nash equilibria (if they exist) are linear combinations of these equilibria. 
+  #Possible m>2 x 2 mixed strategy Nash equilibria (if they exist) are linear combinations of these equilibria.
   
-  #in Nx2 games | 2xN games
+  #in 2xN games
   MixedNE = list()
-  if (length(remain1) == 2 & length(remain2) > 2){
+  if (length(remain1) == 2 & length(remain2) > 2) {
     #Player 2 with more than 2 strategies remaining.
     n = length(remain2)
-    for(i in 1:(n-1)){
-      for(j in (i+1):n){
-        if(!all(p1BRs[[i]] == p1BRs[[j]]) | (length(p1BRs[[i]])+length(p1BRs[[j]])) == 4){
+    for (i in 1:(n - 1)) {
+      for (j in (i + 1):n) {
+        if (!all(p1BRs[[i]] == p1BRs[[j]]) |
+            (length(p1BRs[[i]]) + length(p1BRs[[j]])) == 4) {
           #find the mixed NE in all 2x2 games that don't share the same BR
-          MixedNE[[length(MixedNE)+1]] = Find2x2MixedNE(game, remain1, c(remain2[i],remain2[j]))
+          Possible = Find2x2MixedNE(game, remain1, c(remain2[i], remain2[j]))
+          #Check to see if the mixed NE in the 2x2 game is also a mixed NE in the 2xN game
+          PossiblePayoffs = colSums(game[remain1, , 2] * Possible[[1]])
+          BR = which(PossiblePayoffs == max(PossiblePayoffs))
+          if (remain2[i] %in% BR & remain2[j] %in% BR) {
+            #If true, then  the 2x2 NE is a NE in the 2xN game
+            MixedNE[[length(MixedNE) + 1]] = Possible
+          }
         }
       }
     }
   }
   
-  if (length(remain1) > 2 & length(remain2) == 2){
+  #in Nx2 games
+  if (length(remain1) > 2 & length(remain2) == 2) {
     #Player 1 with more than 2 strategies remaining.
     n = length(remain1)
-    for(i in 1:(n-1)){
-      for(j in (i+1):n){
-        if(!all(p2BRs[[i]] == p2BRs[[j]]) | (length(p2BRs[[i]])+length(p2BRs[[j]])) == 4){
+    for (i in 1:(n - 1)) {
+      for (j in (i + 1):n) {
+        if (!all(p2BRs[[i]] == p2BRs[[j]]) |
+            (length(p2BRs[[i]]) + length(p2BRs[[j]])) == 4) {
           #find the mixed NE in all 2x2 games that don't share the same BR
-          MixedNE[[length(MixedNE)+1]] = Find2x2MixedNE(game, c(remain1[i], remain1[j]), remain2)
+          Possible = Find2x2MixedNE(game, c(remain1[i], remain1[j]), remain2)
+          #Check to see if the mixed NE in the 2x2 game is also a mixed NE in the Nx2 game
+          PossiblePayoffs = rowSums(game[, remain2, 1] * Possible[[2]])
+          BR = which(PossiblePayoffs == max(PossiblePayoffs))
+          if (remain1[i] %in% BR & remain1[j] %in% BR) {
+            #If true, then  the 2x2 NE is a NE in the 2xN game
+            MixedNE[[length(MixedNE) + 1]] = Possible
+          }
         }
       }
     }
   }
   return(MixedNE)
 }
+
