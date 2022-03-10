@@ -1,7 +1,7 @@
 library(tidyverse)
 
 game = array(c(3,10,12,4,15,17,7,6,10,4,4,8), dim = c(2,3,2))
-game = array(c(0,0,1,1,0,0,7,6,10,4,4,8), dim = c(2,3,2))
+game = array(c(10,0,3,4,0,10,10,0,3,4,0,10), dim = c(2,3,2))
 
 
 game = makegame(7,5)
@@ -30,9 +30,12 @@ if(length(remain1)==2 & length(remain2)==2){
   MixedNE = Find2x2MixedNE(game, remain1, remain2)
   MixedNE
   NE = c(NE,MixedNE)
+} else {
+  if (length(remain1) == 2 | length(remain2) == 2){
+    MixedNE = FindNx2MixedNE(game, remain1, remain2, p1BRs, p2BRs)
+    NE = c(NE, MixedNE)
+  }
 }
-
-
 
 NE
 

@@ -232,7 +232,10 @@ Find2x2MixedNE = function(game, remain1, remain2) {
 }
 
 
-FindNx2MixedNE = function(){
+FindNx2MixedNE = function(game, remain1, remain2, p1BRs, p2BRs){
+  #This function finds and returns a list of the 2x2 mixed strategy Nash Equilibrium from this Nx2 or 2xN game (if it exists)
+  #Possible m>2 x 2 mixed strategy Nash equilibria (if they exist) are linear combinations of these equilibria. 
+  
   #in Nx2 games | 2xN games
   MixedNE = list()
   if (length(remain1) == 2 & length(remain2) > 2){
@@ -241,7 +244,7 @@ FindNx2MixedNE = function(){
     for(i in 1:(n-1)){
       for(j in (i+1):n){
         if(!all(p1BRs[[i]] == p1BRs[[j]]) | (length(p1BRs[[i]])+length(p1BRs[[j]])) == 4){
-          
+          #find the mixed NE in all 2x2 games that don't share the same BR
           MixedNE[[length(MixedNE)+1]] = Find2x2MixedNE(game, remain1, c(remain2[i],remain2[j]))
         }
       }
@@ -254,13 +257,11 @@ FindNx2MixedNE = function(){
     for(i in 1:(n-1)){
       for(j in (i+1):n){
         if(!all(p2BRs[[i]] == p2BRs[[j]]) | (length(p2BRs[[i]])+length(p2BRs[[j]])) == 4){
+          #find the mixed NE in all 2x2 games that don't share the same BR
           MixedNE[[length(MixedNE)+1]] = Find2x2MixedNE(game, c(remain1[i], remain1[j]), remain2)
         }
       }
     }
   }
-  
-  
-  MixedNE
-  
+  return(MixedNE)
 }
