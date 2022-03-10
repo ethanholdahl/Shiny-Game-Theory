@@ -209,16 +209,23 @@ Find2x2MixedNE = function(game, remain1, remain2) {
     s1[s1[!(s1 %in% remain1)]] = 0
     s2[s2[!(s2 %in% remain2)]] = 0
     
-    #check for any NaNs (the case where one player is always indifferent) and correct by substituting "P"
-    
+    #check for any NaNs (the case where one player is always indifferent) and correct by substituting "P And/Or Q"
     #assign probabilities to remaining pure strategies
-    if(is.nan())
-    
-    s1[remain1][1] = q
-    s1[remain1][2] = 1 - q
-    s2[remain2][1] = p
-    s2[remain2][2] = 1 - p
-    
+    if(is.nan(q)){
+      s1[remain1][1] = "q"
+      s1[remain1][2] = "1 - q"
+    } else {
+      s1[remain1][1] = q
+      s1[remain1][2] = 1 - q
+    }
+    if(is.nan(p)){
+      s2[remain2][1] = "p"
+      s2[remain2][2] = "1 - p"
+    } else {
+      s2[remain2][1] = p
+      s2[remain2][2] = 1 - p
+    }
+
     #return the mixed NE as a list
     return(list(s1, s2))
   }
