@@ -443,16 +443,50 @@ function(input, output) {
     return(list(elimxmax, elimxmin, elimymax, elimymin))
   }
   
+  BRAall = function(game) {
+    #This function preforms best response analysis on all strategies in the game.
+    #It's input is the game being analyzed 
+    
+    #retrieve the list of strategies available to each player
+    S1 = 1:dim(game)[1]
+    S2 = 1:dim(game)[2]
+    
+    #Player 1 BRs
+    #initiate BR list
+    p1BRsall = list()
+    
+    for (s in S2) {
+      brval = max(game[S1, s, 1])
+      p1BRsall[[s]] = S1[brval == game[S1, s, 1]]
+    }
+    
+    #Player 2 BRs
+    #initiate BR list
+    p2BRsall = list()
+    
+    for (s in S1) {
+      brval = max(game[s, S2, 2])
+      p2BRsall[[s]] = S2[brval == game[s, S2, 2]]
+    }
+    returnlist = list(p1BRsall, p2BRsall)
+    names(returnlist) = c("p1BRsall", "p2BRsall")
+    return(returnlist)
+  }
+  
   
   gameinfo = reactive({
     GenerateGame(input$S1, input$S2)
+  })
+  
+  allBRs = reactive({
+    BRAall(gameinfo()[[1]])
   })
   
   tabledata = reactive({
     MakeTableData(input$S1, input$S2, gameinfo()[[1]])
   })
   
-  v <- reactiveValues(elimdata = NULL)
+  v <- reactiveValues(elimdata = NULL, BR = NULL)
   
   observeEvent(input$IEDS, {
     v$elimdata = IEDSTableData(input$S1, input$S2, gameinfo()[[2]])
@@ -460,6 +494,7 @@ function(input, output) {
   
    observeEvent(input$reset, {
     v$elimdata = NULL
+    v$BR = NULL
   })
   
   output$gametable = renderPlot({
@@ -487,5 +522,15 @@ function(input, output) {
       theme(plot.title = element_text(hjust = .5, face = "bold", size = 15))+
       annotate("rect", xmin = v$elimdata[[1]], xmax = v$elimdata[[2]], ymin = v$elimdata[[3]], ymax = v$elimdata[[4]], alpha = .6, fill = "black")
   })
+  
+  observeEvent(input$BR, {
+    v$BR = c("Player 1's Best Responses are", paste(allBRs()[[1]]), "Player 2's Best Responses are", paste(allBRs()[[2]]))
+  })
+  
+  
+  
+  #renderText(c("Player 1's Best Responses are", paste(allBRs()[[1]]), "Player 2's Best Responses are", paste(allBRs()[[2]])))
+  output$br = renderText(v$BR)
+ 
   
 }
