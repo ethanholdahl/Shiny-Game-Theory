@@ -12,3 +12,5 @@ ggplot(data = BR, aes(x = q, y = p, color = Best_Response))+
   geom_point(aes(x = .75, y = .25, size = 1.5), color = "black")+
   guides(size = FALSE) +
   annotate("text", x = .62, y = .23, size = 5, label = "Nash Equilibrium")
+
+#test in github
