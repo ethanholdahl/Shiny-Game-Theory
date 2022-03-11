@@ -254,7 +254,7 @@ function(input, output) {
             #find the mixed NE in all 2x2 games that don't share the same BR
             Possible = Find2x2MixedNE(game, remain1, c(remain2[i], remain2[j]))
             #Check to see if the mixed NE in the 2x2 game is also a mixed NE in the 2xN game
-            PossiblePayoffs = round(colSums(game[remain1, , 2] * Possible[[1]]),4)
+            PossiblePayoffs = round(colSums(game[, , 2] * Possible[[1]]),4)
             BR = which(PossiblePayoffs == round(max(PossiblePayoffs),4))
             if (remain2[i] %in% BR & remain2[j] %in% BR) {
               #If true, then  the 2x2 NE is a NE in the 2xN game
@@ -276,7 +276,7 @@ function(input, output) {
             #find the mixed NE in all 2x2 games that don't share the same BR
             Possible = Find2x2MixedNE(game, c(remain1[i], remain1[j]), remain2)
             #Check to see if the mixed NE in the 2x2 game is also a mixed NE in the Nx2 game
-            PossiblePayoffs = round(rowSums(sweep(game[,remain2,1],2,Possible[[2]],'*')),4)
+            PossiblePayoffs = round(rowSums(sweep(game[,,1],2,Possible[[2]],'*')),4)
             BR = which(PossiblePayoffs == round(max(PossiblePayoffs),4))
             if (remain1[i] %in% BR & remain1[j] %in% BR) {
               #If true, then  the 2x2 NE is a NE in the 2xN game
