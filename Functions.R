@@ -51,7 +51,7 @@ IEDS = function(game) {
           next
         }
         #check if s1 dominates s2
-        if (all(game[s1,-dominated[[2]], 1] > game[s2,-dominated[[2]], 1])) {
+        if (all(game[s1, -dominated[[2]], 1] > game[s2, -dominated[[2]], 1])) {
           #record domination
           dominated[[1]] = c(dominated[[1]], s2)
           dominators[[1]] = c(dominators[[1]], s1)
@@ -59,7 +59,7 @@ IEDS = function(game) {
           finish = FALSE
         }
         #check if s2 dominates s1
-        if (all(game[s1,-dominated[[2]], 1] < game[s2,-dominated[[2]], 1])) {
+        if (all(game[s1, -dominated[[2]], 1] < game[s2, -dominated[[2]], 1])) {
           #record domination
           dominated[[1]] = c(dominated[[1]], s1)
           dominators[[1]] = c(dominators[[1]], s2)
@@ -213,25 +213,18 @@ Find2x2MixedNE = function(game, remain1, remain2) {
     s1[s1[!(s1 %in% remain1)]] = 0
     s2[s2[!(s2 %in% remain2)]] = 0
     
-    #check for any NaNs (the case where one player is always indifferent) and correct by substituting "P And/Or Q"
-    #assign probabilities to remaining pure strategies
-    if (is.nan(q)) {
-      s1[remain1][1] = "q"
-      s1[remain1][2] = "1 - q"
-    } else {
-      s1[remain1][1] = q
-      s1[remain1][2] = 1 - q
-    }
-    if (is.nan(p)) {
-      s2[remain2][1] = "p"
-      s2[remain2][2] = "1 - p"
-    } else {
-      s2[remain2][1] = p
-      s2[remain2][2] = 1 - p
-    }
+    s1[remain1][1] = q
+    s1[remain1][2] = 1 - q
+    s2[remain2][1] = p
+    s2[remain2][2] = 1 - p
     
-    #return the mixed NE as a list
-    return(list(s1, s2))
+    #check for any NaNs (the case where one player is always indifferent) if this is the case the mixed strategy will be picked up later by the Continuous NE function
+    if (is.nan(p)) {
+      return(NULL)
+    } else {
+      #return the mixed NE as a list
+      return(list(s1, s2))
+    }
   }
 }
 
@@ -287,3 +280,50 @@ FindNx2MixedNE = function(game, remain1, remain2, p1BRs, p2BRs) {
   return(MixedNE)
 }
 
+FindContinuous = function(NE){
+  #This function looks across the Nash Equilibria strategy profiles for duplicates in strategies for either player. 
+  #If a duplicate is found, then the linear combination of the two equilibria constitutes a continuous equilibria.
+  
+  for (twice in 1:2) {
+    #repeat the process twice in case there is a whole area of indifference
+    NEContinouos = list()
+    remove = c()
+    #Test for any continuous NE
+    if (length(NE) > 1) {
+      for (i in 1:(length(NE) - 1)) {
+        for (j in (i + 1):length(NE)) {
+          if (all(NE[[i]][[1]] == NE[[j]][[1]])) {
+            #Continuous NE found, solution is linear combination.
+            a = NE[[i]][[2]]
+            b = NE[[j]][[2]]
+            c = paste(b, "+", (a - b), "* p")
+            if (length(NE[[i]]) == 2) {
+              #check if already 3rd element to list added through this process
+              NEContinouos[[length(NEContinouos) + 1]] = list(NE[[i]][[1]], c, "where p is in the interval [0,1]")
+            } else {
+              #already 3rd element: "where p is in the interval [0,1]" add second comment for q.
+              NEContinouos[[length(NEContinouos) + 1]] = list(NE[[i]][[1]], c, "where p and q are in the interval [0,1]")
+            }
+            remove = c(remove, i, j)
+          }
+          if (all(NE[[i]][[2]] == NE[[j]][[2]])) {
+            #Continuous NE found, solution is linear combination.
+            a = NE[[i]][[1]]
+            b = NE[[j]][[1]]
+            c = paste(b, "+", (a - b), "* q")
+            if (length(NE[[i]]) == 2) {
+              #check if already 3rd element to list added through this process
+              NEContinouos[[length(NEContinouos) + 1]] = list(c, NE[[i]][[2]], "where q is in the interval [0,1]")
+            } else {
+              #will have been picked up above
+              }
+            remove = c(remove, i, j)
+          }
+        }
+      }
+    }
+    NE = c(NE[-remove], NEContinouos)
+  }
+  #return list of Nash Equilibria
+  return(NE)
+}
