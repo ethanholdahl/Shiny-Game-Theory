@@ -379,3 +379,19 @@ GenerateGame = function(S1,S2){
   
   return(list(game, dominated, dominators, p1BRs, p2BRs, remain1, remain2, PureNE, ContinuousNE))
 }
+
+MakeTableData = function(S1, S2, game){
+  #This function takes game info as inputs and returns ggplot ready inputs as outputs
+  
+  straty = c(.5-(1:S1), rep(.2, each = S2))
+  stratx = c(rep(-.2, each = S1), (1:S2)-.5)
+  stratnames = c(paste0("s",1:S1), paste0("s",1:S2))
+  stratcolors = c(rep("red", each = S1), rep("blue", each = S2))
+  
+  payoffs = as.vector(game)
+  payoffsy =  c(.25-rep(1:S1, times = S2), .75-rep(1:S1, times = S2))
+  payoffsx = c(rep(1:S2, each = S1)-.75, rep(1:S2, each = S1)-.25)
+  payoffcolors = rep(c("red","blue"), each = S1*S2)
+  
+  return(list(stratx, straty, stratnames, stratcolors, payoffsx, payoffsy, payoffs, payoffcolors))
+}
