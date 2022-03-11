@@ -161,7 +161,7 @@ FindPureNE = function(game, p1BRs, p2BRs, remain2) {
   #This function finds and returns a list of all pure strategy NE in a game
   #Inputs are the original game, best response correspondences, and a list of remaining strategies for player 2.
   
-  #create empty list for Nash Eeuilibrias
+  #create empty list for Nash Equilibrias
   NE = list()
   for (s in remain2) {
     for (strats1 in p1BRs[[s]]) {
@@ -400,18 +400,17 @@ IEDSTableData = function(S1, S2, dominated){
   #This function takes game information about dominated strategies as inputs
   #This function returns ggplot ready inputs to depict eliminations
   
-  dominatedstrats1 = gameinfo[[2]][[1]][gameinfo[[2]][[1]]<100]
-  dominatedstrats2 = gameinfo[[2]][[2]][gameinfo[[2]][[2]]<100]
-  #create indacator if anything was eliminated
-  eliminations = FALSE
+  dominatedstrats1 = dominated[[1]][dominated[[1]]<100]
+  dominatedstrats2 = dominated[[2]][dominated[[2]]<100]
+  
+  #initiate ggplot data with values that will not be seen
   elimxmin = c(10)
   elimxmax = c(10)
   elimymin = c(10)
   elimymax = c(10)
   if(length(dominatedstrats1)>0){
     #some strats were dominated
-    #set indicator to TRUE
-    eliminations = TRUE
+    
     for(s in dominatedstrats1){
       #create ggplot data
       elimxmin = c(0, elimxmin)
@@ -422,8 +421,7 @@ IEDSTableData = function(S1, S2, dominated){
   }
   if(length(dominatedstrats2)>0){
     #some strats were dominated
-    #set indicator to TRUE
-    eliminations = TRUE
+    
     for(s in dominatedstrats2){
       #create ggplot data
       elimxmin = c(s-1, elimxmin)
@@ -433,5 +431,35 @@ IEDSTableData = function(S1, S2, dominated){
     }
   }
   
-  return(list(eliminations, elimxmax, elimxmin, elimymax, elimymin))
+  return(list(elimxmax, elimxmin, elimymax, elimymin))
+}
+
+BRAall = function(game) {
+  #This function preforms best response analysis on all strategies in the game.
+  #It's input is the game being analyzed 
+  
+  #retrieve the list of strategies available to each player
+  S1 = 1:dim(game)[1]
+  S2 = 1:dim(game)[2]
+  
+  #Player 1 BRs
+  #initiate BR list
+  p1BRsall = list()
+  
+  for (s in S2) {
+    brval = max(game[S1, s, 1])
+    p1BRsall[[s]] = S1[brval == game[S1, s, 1]]
+  }
+  
+  #Player 2 BRs
+  #initiate BR list
+  p2BRsall = list()
+  
+  for (s in S1) {
+    brval = max(game[s, S2, 2])
+    p2BRsall[[s]] = S2[brval == game[s, S2, 2]]
+  }
+  returnlist = list(p1BRsall, p2BRsall)
+  names(returnlist) = c("p1BRsall", "p2BRsall")
+  return(returnlist)
 }
