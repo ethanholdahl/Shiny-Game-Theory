@@ -77,8 +77,12 @@ navbarPage(
                           "All NE"
                         ),
                         actionButton(
-                          "reset",
-                          "reset"
+                          "clear",
+                          "Clear"
+                        ),
+                        actionButton(
+                          "regenerate",
+                          "New Game"
                         )
                       ),
                       

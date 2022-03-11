@@ -492,7 +492,7 @@ function(input, output) {
     v$elimdata = IEDSTableData(input$S1, input$S2, gameinfo()[[2]])
   })
   
-   observeEvent(input$reset, {
+   observeEvent(input$clear, {
     v$elimdata = NULL
     v$BR = NULL
     v$pureNE = NULL
