@@ -395,3 +395,43 @@ MakeTableData = function(S1, S2, game){
   
   return(list(stratx, straty, stratnames, stratcolors, payoffsx, payoffsy, payoffs, payoffcolors))
 }
+
+IEDSTableData = function(S1, S2, dominated){
+  #This function takes game information about dominated strategies as inputs
+  #This function returns ggplot ready inputs to depict eliminations
+  
+  dominatedstrats1 = gameinfo[[2]][[1]][gameinfo[[2]][[1]]<100]
+  dominatedstrats2 = gameinfo[[2]][[2]][gameinfo[[2]][[2]]<100]
+  #create indacator if anything was eliminated
+  eliminations = FALSE
+  elimxmin = c(10)
+  elimxmax = c(10)
+  elimymin = c(10)
+  elimymax = c(10)
+  if(length(dominatedstrats1)>0){
+    #some strats were dominated
+    #set indicator to TRUE
+    eliminations = TRUE
+    for(s in dominatedstrats1){
+      #create ggplot data
+      elimxmin = c(0, elimxmin)
+      elimxmax = c(S2, elimxmax)
+      elimymin = c(-s, elimymin)
+      elimymax = c(1-s, elimymax)
+    }
+  }
+  if(length(dominatedstrats2)>0){
+    #some strats were dominated
+    #set indicator to TRUE
+    eliminations = TRUE
+    for(s in dominatedstrats2){
+      #create ggplot data
+      elimxmin = c(s-1, elimxmin)
+      elimxmax = c(s, elimxmax)
+      elimymin = c(-S1, elimymin)
+      elimymax = c(0, elimymax)
+    }
+  }
+  
+  return(list(eliminations, elimxmax, elimxmin, elimymax, elimymin))
+}
