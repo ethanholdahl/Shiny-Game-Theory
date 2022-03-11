@@ -170,7 +170,7 @@ function(input, output) {
     #This function finds and returns a list of all pure strategy NE in a game
     #Inputs are the original game, best response correspondences, and a list of remaining strategies for player 2.
     
-    #create empty list for Nash Eeuilibrias
+    #create empty list for Nash Equilibrias
     NE = list()
     for (s in remain2) {
       for (strats1 in p1BRs[[s]]) {
@@ -249,13 +249,13 @@ function(input, output) {
       n = length(remain2)
       for (i in 1:(n - 1)) {
         for (j in (i + 1):n) {
-          if (!all(p1BRs[[i]] == p1BRs[[j]]) |
-              (length(p1BRs[[i]]) + length(p1BRs[[j]])) == 4) {
+          if (!all(p1BRs[[remain2[i]]] == p1BRs[[remain2[j]]]) |
+              (length(p1BRs[[remain2[i]]]) + length(p1BRs[[remain2[j]]])) == 4) {
             #find the mixed NE in all 2x2 games that don't share the same BR
             Possible = Find2x2MixedNE(game, remain1, c(remain2[i], remain2[j]))
             #Check to see if the mixed NE in the 2x2 game is also a mixed NE in the 2xN game
-            PossiblePayoffs = colSums(game[remain1, , 2] * Possible[[1]])
-            BR = which(PossiblePayoffs == max(PossiblePayoffs))
+            PossiblePayoffs = round(colSums(game[remain1, , 2] * Possible[[1]]),4)
+            BR = which(PossiblePayoffs == round(max(PossiblePayoffs),4))
             if (remain2[i] %in% BR & remain2[j] %in% BR) {
               #If true, then  the 2x2 NE is a NE in the 2xN game
               MixedNE[[length(MixedNE) + 1]] = Possible
@@ -271,13 +271,13 @@ function(input, output) {
       n = length(remain1)
       for (i in 1:(n - 1)) {
         for (j in (i + 1):n) {
-          if (!all(p2BRs[[i]] == p2BRs[[j]]) |
-              (length(p2BRs[[i]]) + length(p2BRs[[j]])) == 4) {
+          if (!all(p2BRs[[remain1[i]]] == p2BRs[[remain1[j]]]) |
+              (length(p2BRs[[remain1[i]]]) + length(p2BRs[[remain1[j]]])) == 4) {
             #find the mixed NE in all 2x2 games that don't share the same BR
             Possible = Find2x2MixedNE(game, c(remain1[i], remain1[j]), remain2)
             #Check to see if the mixed NE in the 2x2 game is also a mixed NE in the Nx2 game
-            PossiblePayoffs = rowSums(game[, remain2, 1] * Possible[[2]])
-            BR = which(PossiblePayoffs == max(PossiblePayoffs))
+            PossiblePayoffs = round(rowSums(sweep(game[,remain2,1],2,Possible[[2]],'*')),4)
+            BR = which(PossiblePayoffs == round(max(PossiblePayoffs),4))
             if (remain1[i] %in% BR & remain1[j] %in% BR) {
               #If true, then  the 2x2 NE is a NE in the 2xN game
               MixedNE[[length(MixedNE) + 1]] = Possible
@@ -419,7 +419,7 @@ function(input, output) {
     elimymax = c(10)
     if(length(dominatedstrats1)>0){
       #some strats were dominated
-
+      
       for(s in dominatedstrats1){
         #create ggplot data
         elimxmin = c(0, elimxmin)
@@ -486,7 +486,7 @@ function(input, output) {
     MakeTableData(input$S1, input$S2, gameinfo()[[1]])
   })
   
-  v <- reactiveValues(elimdata = NULL, BR = NULL)
+  v <- reactiveValues(elimdata = NULL, BR = NULL, pureNE = NULL, allNE = NULL)
   
   observeEvent(input$IEDS, {
     v$elimdata = IEDSTableData(input$S1, input$S2, gameinfo()[[2]])
@@ -495,6 +495,8 @@ function(input, output) {
    observeEvent(input$reset, {
     v$elimdata = NULL
     v$BR = NULL
+    v$pureNE = NULL
+    v$allNE = NULL
   })
   
   output$gametable = renderPlot({
@@ -527,10 +529,20 @@ function(input, output) {
     v$BR = c("Player 1's Best Responses are", paste(allBRs()[[1]]), "Player 2's Best Responses are", paste(allBRs()[[2]]))
   })
   
+  observeEvent(input$PureNE, {
+    v$pureNE = c("The list of pure strategy Nash Equilibria are:", paste(gameinfo()[[8]]))
+             })
+  
+  observeEvent(input$allNE, {
+    v$allNE = c("The list of all (both pure and mixed) strategy Nash Equilibria are:", paste(gameinfo()[[9]]))
+  })
   
   
-  #renderText(c("Player 1's Best Responses are", paste(allBRs()[[1]]), "Player 2's Best Responses are", paste(allBRs()[[2]])))
   output$br = renderText(v$BR)
+  
+  output$pureNE = renderText(v$pureNE)
+  
+  output$allNE = renderText(v$allNE)
  
   
 }
