@@ -75,11 +75,15 @@ navbarPage(
                         actionButton(
                           "allNE",
                           "All NE"
+                        ),
+                        actionButton(
+                          "reset",
+                          "reset"
                         )
                       ),
                       
                       
                       # Show a plot of the generated distribution
-                      mainPanel(plotOutput("GameTable"), br(), br(), br(), textOutput("ieds"), br(), textOutput("br"), br(), textOutput("pureNE"), br(), textOutput("allNE")
+                      mainPanel(plotOutput("gametable"), br(), br(), br(), plotOutput("iedstable"), br(), textOutput("br"), br(), textOutput("pureNE"), br(), textOutput("allNE")
                       )))
 )
