@@ -51,7 +51,7 @@ IEDS = function(game) {
           next
         }
         #check if s1 dominates s2
-        if (all(game[s1, -dominated[[2]], 1] > game[s2, -dominated[[2]], 1])) {
+        if (all(game[s1,-dominated[[2]], 1] > game[s2,-dominated[[2]], 1])) {
           #record domination
           dominated[[1]] = c(dominated[[1]], s2)
           dominators[[1]] = c(dominators[[1]], s1)
@@ -59,7 +59,7 @@ IEDS = function(game) {
           finish = FALSE
         }
         #check if s2 dominates s1
-        if (all(game[s1, -dominated[[2]], 1] < game[s2, -dominated[[2]], 1])) {
+        if (all(game[s1,-dominated[[2]], 1] < game[s2,-dominated[[2]], 1])) {
           #record domination
           dominated[[1]] = c(dominated[[1]], s1)
           dominators[[1]] = c(dominators[[1]], s2)
@@ -280,14 +280,15 @@ FindNx2MixedNE = function(game, remain1, remain2, p1BRs, p2BRs) {
   return(MixedNE)
 }
 
-FindContinuous = function(NE){
-  #This function looks across the Nash Equilibria strategy profiles for duplicates in strategies for either player. 
+FindContinuous = function(NE) {
+  #This function looks across the Nash Equilibria strategy profiles for duplicates in strategies for either player.
   #If a duplicate is found, then the linear combination of the two equilibria constitutes a continuous equilibria.
   
   for (twice in 1:2) {
     #repeat the process twice in case there is a whole area of indifference
     NEContinouos = list()
-    remove = c()
+    #set 777 for fill value to avoid NULL errors.
+    remove = c(777)
     #Test for any continuous NE
     if (length(NE) > 1) {
       for (i in 1:(length(NE) - 1)) {
@@ -316,7 +317,7 @@ FindContinuous = function(NE){
               NEContinouos[[length(NEContinouos) + 1]] = list(c, NE[[i]][[2]], "where q is in the interval [0,1]")
             } else {
               #will have been picked up above
-              }
+            }
             remove = c(remove, i, j)
           }
         }

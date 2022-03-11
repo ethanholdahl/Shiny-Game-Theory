@@ -37,10 +37,12 @@ if (length(remain1) == 2 & length(remain2) == 2) {
     NE = c(NE, MixedNE)
   }
 }
-NE
-
 
 NE = NE[which(!(sapply(NE, is.null)))]
 
-ContinuousNE = 
+NE
+
+ContinuousNE = FindContinuous(NE)
+
+ContinuousNE
 
