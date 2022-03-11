@@ -4,10 +4,10 @@ username:
 account: ethanholdahl
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
-appId: 5831400
-bundleId: 5671329
+appId: 5833971
+bundleId: 5673105
 url: https://ethanholdahl.shinyapps.io/Game-Theory-Tools/
-when: 1646998685.5428
-lastSyncTime: 1646998685.5428
+when: 1647024280.19337
+lastSyncTime: 1647024280.19337
 asMultiple: FALSE
 asStatic: FALSE
