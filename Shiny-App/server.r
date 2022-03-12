@@ -5,7 +5,7 @@ theme_set(theme_minimal())
 
 
 # Define server logic
-function(input, output) {
+function(input, output, session) {
   
   MakeGame = function(S1, S2) {
     #This function creates a 3-dimensional array meant to represent payoffs in a 2 player S1 by S2 normal form game.
@@ -389,6 +389,7 @@ function(input, output) {
     return(list(game, dominated, dominators, p1BRs, p2BRs, remain1, remain2, PureNE, ContinuousNE))
   }
   
+  
   MakeTableData = function(S1, S2, game){
     #This function takes game info as inputs and returns ggplot ready inputs as outputs
     
@@ -490,6 +491,18 @@ function(input, output) {
   
   observeEvent(input$IEDS, {
     v$elimdata = IEDSTableData(input$S1, input$S2, gameinfo()[[2]])
+  })
+  
+  observeEvent(input$regenerate, {
+    #Trick to generate new game. Not sure if there is a "cleaner" method.
+    S1 = input$S1
+    if (S1 ==2){
+      S11 = 3
+    } else {
+      S11 = S1-1
+    }
+    updateSliderInput(session, "S1", value = S11)
+    updateSliderInput(session, "S1", value = S1)
   })
   
    observeEvent(input$clear, {
