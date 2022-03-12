@@ -503,6 +503,10 @@ function(input, output, session) {
     }
     updateSliderInput(session, "S1", value = S11)
     updateSliderInput(session, "S1", value = S1)
+    v$elimdata = NULL
+    v$BR = NULL
+    v$pureNE = NULL
+    v$allNE = NULL
   })
   
    observeEvent(input$clear, {
