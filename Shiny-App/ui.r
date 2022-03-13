@@ -32,7 +32,7 @@ navbarPage(
     helpText("4. Identify any mixed strategy Nash Equilibria"),
     
     helpText(
-      "On the sidebar on the left you will be able to select how large of a game you want to generate. The payoffs shown in the generated game are randomly sampled from a list of integers from -10 to 20 with replacement.
+      "In the panel below the game you will be able to select how large of a game you want to generate. The payoffs shown in the generated game are randomly sampled from a list of integers from -10 to 20 with replacement.
       After selecting the size of your game you may select the IEDS, Best Response, Pure NE, and All NE buttons to reveal the strategies dominated, the best reponse correspondance, list of pure strategy Nash Equilibria, and list of all Nash Equilibria in the game."
     ),
     helpText(
@@ -41,9 +41,9 @@ navbarPage(
     helpText("More features will be added thoughout the weekend as soon as I'm able to code them."),
     
     # Sidebar with a slider input for number of bins
-    sidebarLayout(
-                      sidebarPanel(
-                        style = "position:fixed;width:inherit;",
+    verticalLayout(
+      plotOutput("gametable"),
+                      wellPanel(
                         sliderInput(
                           "S1",
                           label = "Number of Strategies for Player 1:",
@@ -87,7 +87,15 @@ navbarPage(
                       ),
                       
                       
-                      # Show a plot of the generated distribution
-                      mainPanel(plotOutput("gametable"), br(), br(), br(), plotOutput("iedstable"), br(), textOutput("br"), br(), textOutput("pureNE"), br(), textOutput("allNE")
-                      )))
+                      # Show a plot of the generated distribution 
+      br(), 
+      plotOutput("iedstable"), 
+      br(), 
+      textOutput("br"), 
+      br(), 
+      textOutput("pureNE"), 
+      br(), 
+      textOutput("allNE")
+                      )
+                      )
 )
