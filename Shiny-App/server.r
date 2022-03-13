@@ -487,11 +487,42 @@ function(input, output, session) {
     MakeTableData(input$S1, input$S2, gameinfo()[[1]])
   })
   
-  v <- reactiveValues(elimdata = NULL, BR = NULL, pureNE = NULL, allNE = NULL)
+  v <- reactiveValues(elimdata = NULL, BR = NULL, pureNE = NULL, allNE = NULL, hover_shade = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8))
   
   observeEvent(input$IEDS, {
     v$elimdata = IEDSTableData(input$S1, input$S2, gameinfo()[[2]])
   })
+  
+  observeEvent(input$plot_hover, {
+    hoverx = round(input$plot_hover$x + .5)
+    hovery = round(input$plot_hover$y - .5)
+    if(hoverx != 0 & hovery != 0){
+      shade = c(7,7,7,7)
+    }
+    if (hoverx + hovery == 0) {
+      shade = c(7,7,7,7)
+    } else {
+      if (hoverx == 0) {
+        shade = c(0, input$S2, hovery, hovery + 1)
+      }
+      if (hovery == 0) {
+        shade = c(hoverx - 1, hoverx,-input$S1, 0)
+      }
+    }
+    
+    
+    v$hover_shade = v$hover_shade %>%
+      add_row(xmin = 8, xmax = 8, ymin = 8, ymax = 8) %>%
+      add_row(xmin = shade[1], xmax = shade[2], ymin = shade[3], ymax = shade[4])
+    
+    v$hover_shade = distinct(v$hover_shade) %>%
+      slice_tail()
+  })
+  
+  observeEvent(input$removehover, {
+    v$hover_shade = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
+  })
+  
   
   observeEvent(input$regenerate, {
     #Trick to generate new game. Not sure if there is a "cleaner" method.
@@ -515,17 +546,25 @@ function(input, output, session) {
     v$pureNE = NULL
     v$allNE = NULL
   })
-  
+   
+   
   output$gametable = renderPlot({
-    ggplot()+
+    # plot
+    p = ggplot()+
       geom_segment(aes(x = seq(0,input$S2), y = 0, xend = seq(0,input$S2), yend = -input$S1))+
       geom_segment(aes(x = 0, y = seq(0,-input$S1), xend = input$S2, yend = seq(0,-input$S1)))+
       annotate("text", x = tabledata()[[1]], y = tabledata()[[2]], size = 10, label = tabledata()[[3]], color = tabledata()[[4]])+
       annotate("text", x = tabledata()[[5]], y = tabledata()[[6]], size = 10, label = tabledata()[[7]], color = tabledata()[[8]])+
       theme_void()+
-      coord_cartesian(xlim =c(-.3, input$S2), ylim = c(-input$S1,.3))
+      coord_cartesian(xlim =c(-.3, input$S2), ylim = c(-input$S1,.3)) +
+      annotate("rect", xmin = v$hover_shade$xmin, xmax = v$hover_shade$xmax, ymin = v$hover_shade$ymin, ymax = v$hover_shade$ymax, alpha = .2, fill = "black")
+    p
     })
+
   
+  output$info = renderPrint({
+    print(v$hover_shade)
+  })
 
   
   output$iedstable = renderPlot({
@@ -560,6 +599,5 @@ function(input, output, session) {
   output$pureNE = renderText(v$pureNE)
   
   output$allNE = renderText(v$allNE)
- 
-  
+
 }

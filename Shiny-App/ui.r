@@ -42,7 +42,13 @@ navbarPage(
     
     # Sidebar with a slider input for number of bins
     verticalLayout(
-      plotOutput("gametable"),
+      plotOutput("gametable",
+                 click = "plot_click",
+                 dblclick = "plot_dblclick",
+                 hover = "plot_hover"),
+      verbatimTextOutput("info"),
+      wellPanel(actionButton("removehover",
+                             "Remove Hover Effects")),
                       wellPanel(
                         sliderInput(
                           "S1",
