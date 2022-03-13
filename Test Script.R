@@ -3,7 +3,7 @@ install.packages("ggplot2")
 library(tidyverse)
 library(ggplot2)
 
-S1 = 2
+S1 = 5
 S2 = 5
 
 gameinfo = GenerateGame(S1,S2)
@@ -11,7 +11,7 @@ gameinfo = GenerateGame(S1,S2)
 # GAME TABLE GRAPHIC
 
 tabledata = MakeTableData(S1,S2, gameinfo[[1]])
-
+tabledata[[7]] = as.character(tabledata[[7]])
 p = ggplot()+
   geom_segment(aes(x = seq(0,S2), y = 0, xend = seq(0,S2), yend = -S1))+
   geom_segment(aes(x = 0, y = seq(0,-S1), xend = S2, yend = seq(0,-S1)))+
@@ -36,5 +36,33 @@ ggplot()+
   coord_cartesian(xlim =c(-.3, S2), ylim = c(-S1,.3)) +
   annotate("rect", xmin = elimdata[[1]], xmax = elimdata[[2]], ymin = elimdata[[3]], ymax = elimdata[[4]], alpha = .6, fill = "black")
 
+BRTableData = function(){
+  tabledata[[4]]
+  
+}
+gameinfo
 
-# 
+a = BRAall(gameinfo[[1]])
+a[[1]]
+a[[2]]
+gameinfo[[1]]
+
+aa = tibble(x = tabledata[[5]], y = tabledata[[6]], value = tabledata[[7]], color = tabledata[[8]])
+
+
+
+interactive = aa
+
+
+
+p = ggplot()+
+  geom_segment(aes(x = seq(0,S2), y = 0, xend = seq(0,S2), yend = -S1))+
+  geom_segment(aes(x = 0, y = seq(0,-S1), xend = S2, yend = seq(0,-S1)))+
+  annotate("text", x = tabledata[[1]], y = tabledata[[2]], size = 10, label = tabledata[[3]], color = tabledata[[4]])+
+  annotate("text", x = tabledata[[5]], y = tabledata[[6]], size = 10, label = tabledata[[7]], color = tabledata[[8]])+
+  theme_void()+
+  coord_cartesian(xlim =c(-.3, S2), ylim = c(-S1,.3)) +
+  annotate("text", x = interactive$x+.2, y = interactive$y+.1, size = 10, label = "*", color = interactive$color)
+
+p
+

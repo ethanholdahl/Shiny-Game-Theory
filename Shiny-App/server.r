@@ -489,7 +489,10 @@ function(input, output, session) {
   
   v <- reactiveValues(elimdata = NULL, BR = NULL, pureNE = NULL, allNE = NULL, 
                       hover_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8),
-                      shade_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8))
+                      annotate_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8),
+                      hover_payoffs = tibble(x = 8, y = 8, color = "red"),
+                      annotate_payoffs = tibble(x = 8, y = 8, color = "red")
+  )
   
   observeEvent(input$IEDS, {
     v$elimdata = IEDSTableData(input$S1, input$S2, gameinfo()[[2]])
@@ -499,24 +502,35 @@ function(input, output, session) {
     hoverx = round(input$plot_hover$x + .5)
     hovery = round(input$plot_hover$y - .5)
     if(hoverx != 0 & hovery != 0){
+      #hovering inside game table
       shade = c(7,7,7,7)
-    }
-    if (hoverx + hovery == 0) {
+      hoverdata = nearPoints(tibble(x = tabledata()[[5]], y = tabledata()[[6]], color = tabledata()[[8]]), input$plot_hover, xvar = "x", yvar = "y", threshold = 20, maxpoints = 1)
+       }
+    if (hoverx - hovery == 0) {
       shade = c(7,7,7,7)
+      hoverdata = tibble(x = 7, y = 7, color = "red")
     } else {
+      #hovering over strategies
       if (hoverx == 0) {
         shade = c(0, input$S2, hovery, hovery + 1)
+        hoverdata = tibble(x = 7, y = 7, color = "red")
       }
       if (hovery == 0) {
         shade = c(hoverx - 1, hoverx,-input$S1, 0)
+        hoverdata = tibble(x = 7, y = 7, color = "red")
       }
     }
     
     v$hover_strats = v$hover_strats %>%
-      add_row(xmin = 8, xmax = 8, ymin = 8, ymax = 8) %>%
       add_row(xmin = shade[1], xmax = shade[2], ymin = shade[3], ymax = shade[4])
     
     v$hover_strats = distinct(v$hover_strats) %>%
+      slice_tail()
+    
+    v$hover_payoffs = v$hover_payoffs %>%
+      add_row(x = hoverdata$x, y = hoverdata$y, color = hoverdata$color)
+    
+    v$hover_payoffs = distinct(v$hover_payoffs) %>%
       slice_tail()
   })
   
@@ -541,11 +555,11 @@ function(input, output, session) {
     }
     
     #accumulate eliminations
-    v$shade_strats = v$shade_strats %>%
+    v$annotate_strats = v$annotate_strats %>%
       add_row(xmin = shade[1], xmax = shade[2], ymin = shade[3], ymax = shade[4])
     
     #undo eliminations
-    v$shade_strats = v$shade_strats %>%
+    v$annotate_strats = v$annotate_strats %>%
       group_by(xmin, xmax, ymin, ymax) %>%
       filter(n()==1)%>%
       ungroup()
@@ -556,7 +570,7 @@ function(input, output, session) {
   })
   
   observeEvent(input$removeEliminations, {
-    v$shade_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
+    v$annotate_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
   })
   
   observeEvent(input$regenerate, {
@@ -576,7 +590,7 @@ function(input, output, session) {
     v$pureNE = NULL
     v$allNE = NULL
     v$hover_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
-    v$shade_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
+    v$annotate_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
   
   })
   
@@ -598,13 +612,16 @@ function(input, output, session) {
       theme_void()+
       coord_cartesian(xlim =c(-.3, input$S2), ylim = c(-input$S1,.3)) +
       annotate("rect", xmin = v$hover_strats$xmin, xmax = v$hover_strats$xmax, ymin = v$hover_strats$ymin, ymax = v$hover_strats$ymax, alpha = .2, fill = "black")+
-      annotate("rect", xmin = v$shade_strats$xmin, xmax = v$shade_strats$xmax, ymin = v$shade_strats$ymin, ymax = v$shade_strats$ymax, alpha = .6, fill = "black")
+      annotate("rect", xmin = v$annotate_strats$xmin, xmax = v$annotate_strats$xmax, ymin = v$annotate_strats$ymin, ymax = v$annotate_strats$ymax, alpha = .6, fill = "black")+
+      annotate("text", x = v$hover_payoffs$x+.2, y = v$hover_payoffs$y+.1, size = 10, label = "*", color = v$hover_payoffs$color)
     p
     })
 
   
   output$info = renderPrint({
-    print(v$shade_strats)
+    print(v$annotate_payoffs)
+    print(v$hover_payoffs)
+    
   })
 
   
