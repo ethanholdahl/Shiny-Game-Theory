@@ -39,6 +39,8 @@ navbarPage(
       "Note: You may select a game as large as a 9x9, however, currently the application will only report mixed strategy Nash Equilibria from Nx2 or 2xN games (when N can be any size). Recall, on the final I will not ask you to solve anything that can't be reduced down to atleast a 2x3 or 3x2 game."
     ),
     helpText("More features will be added thoughout the weekend as soon as I'm able to code them."),
+    helpText("New: you can now click on strategy names to eliminate them and click on payoffs to mark them as a best response.
+             Clicking on these elements again removes the annotation. The buttons directly below the table can remove all anotations of a given type at once."),
     
     # Sidebar with a slider input for number of bins
     verticalLayout(
@@ -102,8 +104,6 @@ navbarPage(
                       # Show a plot of the generated distribution 
       br(), 
       plotOutput("resultgame"), 
-      br(), 
-      textOutput("br"), 
       br(), 
       textOutput("pureNE"), 
       br(), 

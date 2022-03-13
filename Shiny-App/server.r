@@ -389,7 +389,6 @@ function(input, output, session) {
     return(list(game, dominated, dominators, p1BRs, p2BRs, remain1, remain2, PureNE, ContinuousNE))
   }
   
-  
   MakeTableData = function(S1, S2, game){
     #This function takes game info as inputs and returns ggplot ready inputs as outputs
     
@@ -474,6 +473,32 @@ function(input, output, session) {
     return(returnlist)
   }
   
+  BRTableData = function(game){
+    #This function takes a game as it's input and finds all the coordinates of BRs.
+    #This function returns ggplot ready inputs to depict BRs
+    
+    #retrieve the list of strategies available to each player
+    S1 = dim(game)[1]
+    S2 = dim(game)[2]
+    
+    BRStars = tibble(x=numeric(), y=numeric(), color=character())
+    BRs = BRAall(game)
+    for(i in 1:S2){
+      for(j in 1:length(BRs[[1]][[i]])){
+        BRStars = BRStars %>%
+          add_row(x = i - .55, y =-BRs[[1]][[i]][j] + .35, color = "red")
+      }
+    }
+    for(i in 1:S1){
+      for(j in 1:length(BRs[[2]][[i]])){
+        BRStars = BRStars %>%
+          add_row(x = BRs[[2]][[i]][j]-.05, y = -i+.85, color = "blue")
+      }
+    }
+    return(BRStars)
+  }
+  
+  
   
   gameinfo = reactive({
     GenerateGame(input$S1, input$S2)
@@ -486,6 +511,8 @@ function(input, output, session) {
   tabledata = reactive({
     MakeTableData(input$S1, input$S2, gameinfo()[[1]])
   })
+  
+  
   
   v <- reactiveValues(elimdata = NULL, BR = NULL, pureNE = NULL, allNE = NULL, 
                       hover_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8),
@@ -652,22 +679,25 @@ function(input, output, session) {
 
   
   output$resultgame = renderPlot({
-    if(is.null(v$elimdata)) return()
-    ggplot()+
+    
+    p = ggplot()+
       geom_segment(aes(x = seq(0,input$S2), y = 0, xend = seq(0,input$S2), yend = -input$S1))+
       geom_segment(aes(x = 0, y = seq(0,-input$S1), xend = input$S2, yend = seq(0,-input$S1)))+
       annotate("text", x = tabledata()[[1]], y = tabledata()[[2]], size = 10, label = tabledata()[[3]], color = tabledata()[[4]])+
       annotate("text", x = tabledata()[[5]], y = tabledata()[[6]], size = 10, label = tabledata()[[7]], color = tabledata()[[8]])+
       theme_void()+
       coord_cartesian(xlim =c(-.3, input$S2), ylim = c(-input$S1,.3))+
-      ggtitle("Game after IEDS")+
+      ggtitle("Solutions")+
       theme(plot.title = element_text(hjust = .5, face = "bold", size = 15))+
+      annotate("text", x = v$BR$x, y = v$BR$y, size = 10, label = "*", color = v$BR$color)+
       annotate("rect", xmin = v$elimdata[[1]], xmax = v$elimdata[[2]], ymin = v$elimdata[[3]], ymax = v$elimdata[[4]], alpha = .6, fill = "black")
+    
+    p
   })
   
   observeEvent(input$BR, {
-    v$BR = c("Player 1's Best Responses are", paste(allBRs()[[1]]), "Player 2's Best Responses are", paste(allBRs()[[2]]))
-  })
+    v$BR = BRTableData(gameinfo()[[1]])
+      })
   
   observeEvent(input$PureNE, {
     v$pureNE = c("The list of pure strategy Nash Equilibria are:", paste(gameinfo()[[8]]))
@@ -676,9 +706,6 @@ function(input, output, session) {
   observeEvent(input$allNE, {
     v$allNE = c("The list of all (both pure and mixed) strategy Nash Equilibria are:", paste(gameinfo()[[9]]))
   })
-  
-  
-  output$br = renderText(v$BR)
   
   output$pureNE = renderText(v$pureNE)
   

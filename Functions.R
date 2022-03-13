@@ -463,3 +463,28 @@ BRAall = function(game) {
   names(returnlist) = c("p1BRsall", "p2BRsall")
   return(returnlist)
 }
+
+BRTableData = function(game){
+  #This function takes a game as it's input and finds all the coordinates of BRs.
+  #This function returns ggplot ready inputs to depict BRs
+  
+  #retrieve the list of strategies available to each player
+  S1 = dim(game)[1]
+  S2 = dim(game)[2]
+  
+  BRStars = tibble(x=numeric(), y=numeric(), color=character())
+  BRs = BRAall(game)
+  for(i in 1:S2){
+    for(j in 1:length(BRs[[1]][[i]])){
+      BRStars = BRStars %>%
+        add_row(x = i - .55, y =-BRs[[1]][[i]][j] + .35, color = "red")
+    }
+  }
+  for(i in 1:S1){
+    for(j in 1:length(BRs[[2]][[i]])){
+      BRStars = BRStars %>%
+        add_row(x = BRs[[2]][[i]][j]-.05, y = -i+.85, color = "blue")
+    }
+  }
+  return(BRStars)
+}
