@@ -487,7 +487,9 @@ function(input, output, session) {
     MakeTableData(input$S1, input$S2, gameinfo()[[1]])
   })
   
-  v <- reactiveValues(elimdata = NULL, BR = NULL, pureNE = NULL, allNE = NULL, hover_shade = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8))
+  v <- reactiveValues(elimdata = NULL, BR = NULL, pureNE = NULL, allNE = NULL, 
+                      hover_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8),
+                      shade_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8))
   
   observeEvent(input$IEDS, {
     v$elimdata = IEDSTableData(input$S1, input$S2, gameinfo()[[2]])
@@ -510,19 +512,52 @@ function(input, output, session) {
       }
     }
     
-    
-    v$hover_shade = v$hover_shade %>%
+    v$hover_strats = v$hover_strats %>%
       add_row(xmin = 8, xmax = 8, ymin = 8, ymax = 8) %>%
       add_row(xmin = shade[1], xmax = shade[2], ymin = shade[3], ymax = shade[4])
     
-    v$hover_shade = distinct(v$hover_shade) %>%
+    v$hover_strats = distinct(v$hover_strats) %>%
       slice_tail()
   })
   
-  observeEvent(input$removehover, {
-    v$hover_shade = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
+  observeEvent(input$plot_click,{
+    #remove hover shading
+    v$hover_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
+    
+    clickx = round(input$plot_click$x +.5)
+    clicky = round(input$plot_click$y - .5)
+    if(clickx != 0 & clicky != 0){
+      shade = c(7,7,7,7)
+    }
+    if (clickx + clicky == 0) {
+      shade = c(7,7,7,7)
+    } else {
+      if (clickx == 0) {
+        shade = c(0, input$S2, clicky, clicky + 1)
+      }
+      if (clicky == 0) {
+        shade = c(clickx - 1, clickx,-input$S1, 0)
+      }
+    }
+    
+    #accumulate eliminations
+    v$shade_strats = v$shade_strats %>%
+      add_row(xmin = shade[1], xmax = shade[2], ymin = shade[3], ymax = shade[4])
+    
+    #undo eliminations
+    v$shade_strats = v$shade_strats %>%
+      group_by(xmin, xmax, ymin, ymax) %>%
+      filter(n()==1)%>%
+      ungroup()
   })
   
+  observeEvent(input$removeHover, {
+    v$hover_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
+  })
+  
+  observeEvent(input$removeEliminations, {
+    v$shade_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
+  })
   
   observeEvent(input$regenerate, {
     #Trick to generate new game. Not sure if there is a "cleaner" method.
@@ -534,10 +569,15 @@ function(input, output, session) {
     }
     updateSliderInput(session, "S1", value = S11)
     updateSliderInput(session, "S1", value = S1)
+    
+    #reset reactive values
     v$elimdata = NULL
     v$BR = NULL
     v$pureNE = NULL
     v$allNE = NULL
+    v$hover_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
+    v$shade_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
+  
   })
   
    observeEvent(input$clear, {
@@ -557,13 +597,14 @@ function(input, output, session) {
       annotate("text", x = tabledata()[[5]], y = tabledata()[[6]], size = 10, label = tabledata()[[7]], color = tabledata()[[8]])+
       theme_void()+
       coord_cartesian(xlim =c(-.3, input$S2), ylim = c(-input$S1,.3)) +
-      annotate("rect", xmin = v$hover_shade$xmin, xmax = v$hover_shade$xmax, ymin = v$hover_shade$ymin, ymax = v$hover_shade$ymax, alpha = .2, fill = "black")
+      annotate("rect", xmin = v$hover_strats$xmin, xmax = v$hover_strats$xmax, ymin = v$hover_strats$ymin, ymax = v$hover_strats$ymax, alpha = .2, fill = "black")+
+      annotate("rect", xmin = v$shade_strats$xmin, xmax = v$shade_strats$xmax, ymin = v$shade_strats$ymin, ymax = v$shade_strats$ymax, alpha = .6, fill = "black")
     p
     })
 
   
   output$info = renderPrint({
-    print(v$hover_shade)
+    print(v$shade_strats)
   })
 
   

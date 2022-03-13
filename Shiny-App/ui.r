@@ -46,9 +46,13 @@ navbarPage(
                  click = "plot_click",
                  dblclick = "plot_dblclick",
                  hover = "plot_hover"),
-      verbatimTextOutput("info"),
-      wellPanel(actionButton("removehover",
-                             "Remove Hover Effects")),
+      #verbatimTextOutput("info"),
+      wellPanel(
+        actionButton("removeHover",
+                             "Remove Hover Effects"),
+        actionButton("removeEliminations",
+                     "Remove Eliminations")
+                ),
                       wellPanel(
                         sliderInput(
                           "S1",
