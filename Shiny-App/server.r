@@ -652,6 +652,28 @@ function(input, output, session) {
     v$allNE = NULL
   })
    
+   observeEvent(input$S1, {
+     v$elimdata = NULL
+     v$BR = NULL
+     v$pureNE = NULL
+     v$allNE = NULL
+     v$hover_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
+     v$annotate_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
+     v$hover_payoffs = tibble(x = 8, y = 8, color = "red")
+     v$annotate_payoffs = tibble(x = 8, y = 8, color = "red")
+   })
+   
+   observeEvent(input$S2, {
+     v$elimdata = NULL
+     v$BR = NULL
+     v$pureNE = NULL
+     v$allNE = NULL
+     v$hover_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
+     v$annotate_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
+     v$hover_payoffs = tibble(x = 8, y = 8, color = "red")
+     v$annotate_payoffs = tibble(x = 8, y = 8, color = "red")
+   })
+   
    
   output$gametable = renderPlot({
     # plot
