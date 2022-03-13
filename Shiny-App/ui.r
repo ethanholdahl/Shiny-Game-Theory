@@ -46,12 +46,14 @@ navbarPage(
                  click = "plot_click",
                  dblclick = "plot_dblclick",
                  hover = "plot_hover"),
-      verbatimTextOutput("info"),
+      #verbatimTextOutput("info"),
       wellPanel(
         actionButton("removeHover",
                              "Remove Hover Effects"),
         actionButton("removeEliminations",
-                     "Remove Eliminations")
+                     "Remove Eliminations"),
+        actionButton("removeBRs",
+                     "Remove Best Response Indicators")
                 ),
                       wellPanel(
                         sliderInput(
@@ -99,7 +101,7 @@ navbarPage(
                       
                       # Show a plot of the generated distribution 
       br(), 
-      plotOutput("iedstable"), 
+      plotOutput("resultgame"), 
       br(), 
       textOutput("br"), 
       br(), 

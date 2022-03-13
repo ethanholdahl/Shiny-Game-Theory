@@ -537,20 +537,26 @@ function(input, output, session) {
   observeEvent(input$plot_click,{
     #remove hover shading
     v$hover_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
-    
+    v$hover_payoffs = tibble(x = 8, y = 8, color = "red")
     clickx = round(input$plot_click$x +.5)
     clicky = round(input$plot_click$y - .5)
     if(clickx != 0 & clicky != 0){
+      #clicking inside game table
       shade = c(7,7,7,7)
+      clickdata = nearPoints(tibble(x = tabledata()[[5]], y = tabledata()[[6]], color = tabledata()[[8]]), input$plot_click, xvar = "x", yvar = "y", threshold = 20, maxpoints = 1)
     }
-    if (clickx + clicky == 0) {
+    if (clickx - clicky == 0) {
       shade = c(7,7,7,7)
+      clickdata = tibble(x = 8, y = 8, color = "red")
     } else {
+      #clicking on strategies
       if (clickx == 0) {
         shade = c(0, input$S2, clicky, clicky + 1)
+        clickdata = tibble(x = 8, y = 8, color = "red")
       }
       if (clicky == 0) {
         shade = c(clickx - 1, clickx,-input$S1, 0)
+        clickdata = tibble(x = 8, y = 8, color = "red")
       }
     }
     
@@ -563,14 +569,31 @@ function(input, output, session) {
       group_by(xmin, xmax, ymin, ymax) %>%
       filter(n()==1)%>%
       ungroup()
+    
+    #accumulate BRs
+    v$annotate_payoffs = v$annotate_payoffs %>%
+      add_row(x = clickdata$x, y = clickdata$y, color = clickdata$color)
+    
+    #undo BRs
+    v$annotate_payoffs = v$annotate_payoffs %>%
+      group_by(x, y, color) %>%
+      filter(n()==1)%>%
+      ungroup()
+    
   })
   
   observeEvent(input$removeHover, {
     v$hover_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
-  })
+    v$hover_payoffs = tibble(x = 8, y = 8, color = "red")
+    
+    })
   
   observeEvent(input$removeEliminations, {
     v$annotate_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
+  })
+  
+  observeEvent(input$removeBRs, {
+    v$annotate_payoffs = tibble(x = 8, y = 8, color = "red")
   })
   
   observeEvent(input$regenerate, {
@@ -591,7 +614,8 @@ function(input, output, session) {
     v$allNE = NULL
     v$hover_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
     v$annotate_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
-  
+    v$hover_payoffs = tibble(x = 8, y = 8, color = "red")
+    v$annotate_payoffs = tibble(x = 8, y = 8, color = "red")
   })
   
    observeEvent(input$clear, {
@@ -611,9 +635,11 @@ function(input, output, session) {
       annotate("text", x = tabledata()[[5]], y = tabledata()[[6]], size = 10, label = tabledata()[[7]], color = tabledata()[[8]])+
       theme_void()+
       coord_cartesian(xlim =c(-.3, input$S2), ylim = c(-input$S1,.3)) +
+      annotate("text", x = v$hover_payoffs$x+.2, y = v$hover_payoffs$y+.1, size = 10, label = "*", color = v$hover_payoffs$color, alpha = .5) + 
+      annotate("text", x = v$annotate_payoffs$x+.2, y = v$annotate_payoffs$y+.1, size = 10, label = "*", color = v$annotate_payoffs$color, alpha = 1)+
       annotate("rect", xmin = v$hover_strats$xmin, xmax = v$hover_strats$xmax, ymin = v$hover_strats$ymin, ymax = v$hover_strats$ymax, alpha = .2, fill = "black")+
-      annotate("rect", xmin = v$annotate_strats$xmin, xmax = v$annotate_strats$xmax, ymin = v$annotate_strats$ymin, ymax = v$annotate_strats$ymax, alpha = .6, fill = "black")+
-      annotate("text", x = v$hover_payoffs$x+.2, y = v$hover_payoffs$y+.1, size = 10, label = "*", color = v$hover_payoffs$color)
+      annotate("rect", xmin = v$annotate_strats$xmin, xmax = v$annotate_strats$xmax, ymin = v$annotate_strats$ymin, ymax = v$annotate_strats$ymax, alpha = .6, fill = "black")
+
     p
     })
 
@@ -625,7 +651,7 @@ function(input, output, session) {
   })
 
   
-  output$iedstable = renderPlot({
+  output$resultgame = renderPlot({
     if(is.null(v$elimdata)) return()
     ggplot()+
       geom_segment(aes(x = seq(0,input$S2), y = 0, xend = seq(0,input$S2), yend = -input$S1))+
