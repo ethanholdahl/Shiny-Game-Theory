@@ -586,7 +586,7 @@ function(input, output, session) {
   })
   
   observeEvent(input$EPayoffs, {
-    v$ExpectedPayoffGraphs = MakeExpectedPayoffGraphs(gameinfo())
+      v$ExpectedPayoffGraphs = MakeExpectedPayoffGraphs(gameinfo())
   })
   
   v <- reactiveValues(elimdata = NULL, BR = NULL, pureNE = NULL, allNE = NULL, 

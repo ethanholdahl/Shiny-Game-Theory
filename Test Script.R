@@ -1,3 +1,5 @@
+#Fix bug that occurs when eliminated game is 1x2 or 2x1
+
 install.packages("tidyverse")
 install.packages("ggplot2")
 library(tidyverse)
