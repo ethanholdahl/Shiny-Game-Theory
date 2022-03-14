@@ -213,10 +213,10 @@ Find2x2MixedNE = function(game, remain1, remain2) {
     s1[s1[!(s1 %in% remain1)]] = 0
     s2[s2[!(s2 %in% remain2)]] = 0
     
-    s1[remain1][1] = round(q, 4)
-    s1[remain1][2] = round(1 - q, 4)
-    s2[remain2][1] = round(p, 4)
-    s2[remain2][2] = round(1 - p, 4)
+    s1[remain1][1] = q
+    s1[remain1][2] = 1 - q
+    s2[remain2][1] = p
+    s2[remain2][2] = 1 - p
     
     #check for any NaNs (the case where one player is always indifferent) if this is the case the mixed strategy will be picked up later by the Continuous NE function
     if (is.nan(p)) {
@@ -370,6 +370,11 @@ GenerateGame = function(S1,S2){
   }
   
   NE = NE[which(!(sapply(NE, is.null)))]
+  
+  for(i in 1:length(NE)){
+    NE[[i]][[1]] = round(NE[[i]][[1]],4)
+    NE[[i]][[2]] = round(NE[[i]][[2]],4)
+  }
   
   #NE
   
