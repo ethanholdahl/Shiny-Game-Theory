@@ -498,6 +498,72 @@ function(input, output, session) {
     return(BRStars)
   }
   
+  MakeExpectedPayoffGraphs = function(gameinfo) {
+    game = gameinfo[[1]]
+    dominated = gameinfo[[2]]
+    remain1 = gameinfo[[6]]
+    remain2 = gameinfo[[7]]
+    remainGame = game[-dominated[[1]],-dominated[[2]],]
+    remainGame
+    P1Payoffs = NULL
+    P2Payoffs = NULL
+    if (length(remain2) == 2) {
+      #2 strategies remaining for player 2
+      #make ggplot data
+      payoffs = as.vector(remainGame[, , 1])
+      q = rep(c(1, 0), each = length(remain1))
+      Strat = rep(paste0("S", remain1), 2)
+      expectedpayoffs = tibble(payoffs, q, Strat)
+      
+      P1Payoffs = ggplot(expectedpayoffs, aes(x = q, y = payoffs, color = Strat)) +
+        geom_path(size = 1.5) +
+        scale_x_reverse(position = "top") +
+        theme(plot.title = element_text(hjust = .5, face = "bold", size = 15))+
+        guides(size = "none") +
+        ggtitle(
+          "Expected Payoffs for Player 1's Strategies Given Player 2's Choice of q",
+          subtitle = paste0(
+            "where q is the probability player 2 plays S",
+            remain2[1],
+            " and 1-q is the probability player 2 plays S",
+            remain2[2]
+          )
+        ) +
+        ylab("Expected Payoff")
+    }
+    
+    
+    if (length(remain1) == 2) {
+      #2 strategies remaining for player 1
+      #make ggplot data
+      payoffs = as.vector(remainGame[, , 2])
+      payoffs
+      q = rep(c(1, 0), times = length(remain2))
+      q
+      Strat = paste0("S", rep(remain2, each = 2))
+      Strat
+      expectedpayoffs = tibble(payoffs, q, Strat)
+      
+      P2Payoffs = ggplot(expectedpayoffs, aes(x = q, y = payoffs, color = Strat)) +
+        geom_path(size = 1.5) +
+        scale_x_reverse(position = "top") +
+        theme(plot.title = element_text(hjust = .5, face = "bold", size = 15))+
+        guides(size = "none") +
+        ggtitle(
+          "Expected Payoffs for Player 2's Strategies Given Player 1's Choice of p",
+          subtitle = paste0(
+            "where p is the probability player 1 plays S",
+            remain1[1],
+            " and 1-p is the probability player 1 plays S",
+            remain1[2]
+          )
+        ) +
+        ylab("Expected Payoff")
+    }
+    
+    return(list(P1Payoffs, P2Payoffs))
+  }
+  
   
   
   gameinfo = reactive({
@@ -512,13 +578,16 @@ function(input, output, session) {
     MakeTableData(input$S1, input$S2, gameinfo()[[1]])
   })
   
-  
+  observeEvent(input$EPayoffs, {
+    v$ExpectedPayoffGraphs = MakeExpectedPayoffGraphs(gameinfo())
+  })
   
   v <- reactiveValues(elimdata = NULL, BR = NULL, pureNE = NULL, allNE = NULL, 
                       hover_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8),
                       annotate_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8),
                       hover_payoffs = tibble(x = 8, y = 8, color = "red"),
-                      annotate_payoffs = tibble(x = 8, y = 8, color = "red")
+                      annotate_payoffs = tibble(x = 8, y = 8, color = "red"),
+                      ExpectedPayoffGraphs = NULL
   )
   
   observeEvent(input$IEDS, {
@@ -643,6 +712,7 @@ function(input, output, session) {
     v$annotate_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
     v$hover_payoffs = tibble(x = 8, y = 8, color = "red")
     v$annotate_payoffs = tibble(x = 8, y = 8, color = "red")
+    v$ExpectedPayoffGraphs = NULL
   })
   
    observeEvent(input$clear, {
@@ -650,6 +720,7 @@ function(input, output, session) {
     v$BR = NULL
     v$pureNE = NULL
     v$allNE = NULL
+    v$ExpectedPayoffGraphs = NULL
   })
    
    observeEvent(input$S1, {
@@ -661,6 +732,7 @@ function(input, output, session) {
      v$annotate_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
      v$hover_payoffs = tibble(x = 8, y = 8, color = "red")
      v$annotate_payoffs = tibble(x = 8, y = 8, color = "red")
+     v$ExpectedPayoffGraphs = NULL
    })
    
    observeEvent(input$S2, {
@@ -672,6 +744,7 @@ function(input, output, session) {
      v$annotate_strats = tibble(xmin = 8, xmax = 8, ymin = 8, ymax = 8)
      v$hover_payoffs = tibble(x = 8, y = 8, color = "red")
      v$annotate_payoffs = tibble(x = 8, y = 8, color = "red")
+     v$ExpectedPayoffGraphs = NULL
    })
    
    
@@ -701,7 +774,6 @@ function(input, output, session) {
 
   
   output$resultgame = renderPlot({
-    
     p = ggplot()+
       geom_segment(aes(x = seq(0,input$S2), y = 0, xend = seq(0,input$S2), yend = -input$S1))+
       geom_segment(aes(x = 0, y = seq(0,-input$S1), xend = input$S2, yend = seq(0,-input$S1)))+
@@ -716,6 +788,16 @@ function(input, output, session) {
     
     p
   })
+  
+  output$P1expectedpayoffs = renderPlot({
+    v$ExpectedPayoffGraphs[[1]]
+  })
+  
+  output$P2expectedpayoffs = renderPlot({
+    v$ExpectedPayoffGraphs[[2]]
+  })
+  
+  
   
   observeEvent(input$BR, {
     v$BR = BRTableData(gameinfo()[[1]])

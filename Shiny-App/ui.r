@@ -83,6 +83,10 @@ navbarPage(
                           "Best Response"
                         ),
                         actionButton(
+                          "EPayoffs",
+                          "Graph of Expected Payoffs (reduced to Nx2 or 2xN only)"
+                        ),
+                        actionButton(
                           "PureNE",
                           "Pure NE"
                         ),
@@ -105,6 +109,10 @@ navbarPage(
       br(), 
       plotOutput("resultgame"), 
       br(), 
+      plotOutput("P1expectedpayoffs"),
+      br(),
+      plotOutput("P2expectedpayoffs"),
+      br(),
       textOutput("pureNE"), 
       br(), 
       textOutput("allNE")

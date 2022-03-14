@@ -488,3 +488,69 @@ BRTableData = function(game){
   }
   return(BRStars)
 }
+
+MakeExpectedPayoffGraphs = function(gameinfo) {
+  game = gameinfo[[1]]
+  dominated = gameinfo[[2]]
+  remain1 = gameinfo[[6]]
+  remain2 = gameinfo[[7]]
+  remainGame = game[-dominated[[1]],-dominated[[2]],]
+  remainGame
+  P1Payoffs = NULL
+  P2Payoffs = NULL
+  if (length(remain2) == 2) {
+    #2 strategies remaining for player 2
+    #make ggplot data
+    payoffs = as.vector(remainGame[, , 1])
+    q = rep(c(1, 0), each = length(remain1))
+    Strat = rep(paste0("S", remain1), 2)
+    expectedpayoffs = tibble(payoffs, q, Strat)
+    
+    P1Payoffs = ggplot(expectedpayoffs, aes(x = q, y = payoffs, color = Strat)) +
+      geom_path(size = 1.5) +
+      scale_x_reverse(position = "top") +
+      theme(plot.title = element_text(hjust = .5, face = "bold", size = 15))+
+      guides(size = "none") +
+      ggtitle(
+        "Expected Payoffs for Player 1's Strategies Given Player 2's Choice of q",
+        subtitle = paste0(
+          "where q is the probability player 2 plays S",
+          remain2[1],
+          " and 1-q is the probability player 2 plays S",
+          remain2[2]
+        )
+      ) +
+      ylab("Expected Payoff")
+  }
+  
+  
+  if (length(remain1) == 2) {
+    #2 strategies remaining for player 1
+    #make ggplot data
+    payoffs = as.vector(remainGame[, , 2])
+    payoffs
+    q = rep(c(1, 0), times = length(remain2))
+    q
+    Strat = paste0("S", rep(remain2, each = 2))
+    Strat
+    expectedpayoffs = tibble(payoffs, q, Strat)
+    
+    P2Payoffs = ggplot(expectedpayoffs, aes(x = q, y = payoffs, color = Strat)) +
+      geom_path(size = 1.5) +
+      scale_x_reverse(position = "top") +
+      theme(plot.title = element_text(hjust = .5, face = "bold", size = 15))+
+      guides(size = "none") +
+      ggtitle(
+        "Expected Payoffs for Player 2's Strategies Given Player 1's Choice of p",
+        subtitle = paste0(
+          "where p is the probability player 1 plays S",
+          remain1[1],
+          " and 1-p is the probability player 1 plays S",
+          remain1[2]
+        )
+      ) +
+      ylab("Expected Payoff")
+  }
+  
+  return(list(P1Payoffs, P2Payoffs))
+}

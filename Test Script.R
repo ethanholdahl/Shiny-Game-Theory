@@ -3,8 +3,8 @@ install.packages("ggplot2")
 library(tidyverse)
 library(ggplot2)
 
-S1 = 3
-S2 = 5
+S1 = 2
+S2 = 2
 
 gameinfo = GenerateGame(S1,S2)
 
@@ -36,7 +36,7 @@ ggplot()+
   annotate("rect", xmin = elimdata[[1]], xmax = elimdata[[2]], ymin = elimdata[[3]], ymax = elimdata[[4]], alpha = .6, fill = "black")
 
 BRStars = BRTableData(gameinfo[[1]])
-BRStars
+
 
 elimdata = IEDSTableData(S1, S2, gameinfo[[2]])
 ggplot()+
@@ -51,3 +51,7 @@ ggplot()+
   annotate("text", x = BRStars$x, y = BRStars$y, size = 10, label = "*", color = BRStars$color)+
   annotate("rect", xmin = elimdata[[1]], xmax = elimdata[[2]], ymin = elimdata[[3]], ymax = elimdata[[4]], alpha = .6, fill = "black")
 
+
+
+MakeExpectedPayoffGraphs(gameinfo)
+gameinfo[[1]][gameinfo[[6]],gameinfo[[7]],]
