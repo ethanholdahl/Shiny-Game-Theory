@@ -3,7 +3,7 @@ install.packages("ggplot2")
 library(tidyverse)
 library(ggplot2)
 
-S1 = 2
+S1 = 3
 S2 = 2
 
 gameinfo = GenerateGame(S1,S2)
@@ -54,4 +54,4 @@ ggplot()+
 
 
 MakeExpectedPayoffGraphs(gameinfo)
-gameinfo[[1]][gameinfo[[6]],gameinfo[[7]],]
+gameinfo
