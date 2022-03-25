@@ -11,9 +11,7 @@ navbarPage(
     "Normal Form Games",
     h2("Instructions"),
     helpText(
-      "Hello my EC327 students. The final on Monday will heavily feature normal form
-      games and test your ability to find all the Nash Equilibria (both pure and mixed) in those games.
-      I've created this application to help give you additional practice in solving mixed strategy games if you desire it.
+      "I've created this application to help users practice solving normal form games.
       To practice, simply generate a game, solve it, then use the buttons to reveal the solutions."
     ),
     
@@ -36,10 +34,10 @@ navbarPage(
       After selecting the size of your game you may select the IEDS, Best Response, Pure NE, and All NE buttons to reveal the strategies dominated, the best reponse correspondance, list of pure strategy Nash Equilibria, and list of all Nash Equilibria in the game."
     ),
     helpText(
-      "Note: You may select a game as large as a 9x9, however, currently the application will only report mixed strategy Nash Equilibria from Nx2 or 2xN games (when N can be any size). Recall, on the final I will not ask you to solve anything that can't be reduced down to atleast a 2x3 or 3x2 game."
-    ),
-    helpText("More features will be added thoughout the weekend as soon as I'm able to code them."),
-    helpText("New: you can now click on strategy names to eliminate them and click on payoffs to mark them as a best response.
+      "Note: You may select a game as large as a 9x9, however, currently the application will only report mixed strategy Nash Equilibria from Nx2 or 2xN games (when N can be any size)."
+      ),
+    helpText("More features will be added soon."),
+    helpText("New: You can now click on strategy names to eliminate them and click on payoffs to mark them as a best response.
              Clicking on these elements again removes the annotation. The buttons directly below the table can remove all anotations of a given type at once."),
     
     # Sidebar with a slider input for number of bins
