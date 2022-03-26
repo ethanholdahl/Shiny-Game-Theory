@@ -6,7 +6,7 @@ theme_set(theme_minimal())
 
 # Define UI for the application 
 navbarPage(
-  title = "Game Theory Tools by Ethan Holdahl",
+  title = HTML("Game Theory Tools by <a href='https://ethanholdahl.com'>Ethan Holdahl</a>"),
   tabPanel(
     "Normal Form Games",
     h2("Instructions"),
