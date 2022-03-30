@@ -1,10 +1,11 @@
 
 ## Load and install the packages
-library("tidyverse", "shiny")
-theme_set(theme_minimal())
-
+library("tidyverse", "shiny", "shinythemes")
 
 # Define UI for the application 
+fluidPage(
+  theme = shinytheme("sandstone"),
+  tags$head(HTML("<title> Game Theory Tools By Ethan Holdahl </title>")),
 navbarPage(
   title = HTML("Game Theory Tools by <a href='https://ethanholdahl.com'>Ethan Holdahl</a>"),
   tabPanel(
@@ -116,4 +117,5 @@ navbarPage(
       textOutput("allNE")
                       )
                       )
+)
 )
