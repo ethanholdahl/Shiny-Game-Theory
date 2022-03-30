@@ -1,6 +1,8 @@
 
 ## Load and install the packages
-library("tidyverse", "shiny", "shinythemes")
+library(tidyverse) 
+library(shiny)
+library(shinythemes)
 
 # Define UI for the application 
 fluidPage(
