@@ -8,7 +8,7 @@ library(shiny)
 # Define UI for the application 
 fluidPage(
   #theme = shinytheme("sandstone"),
-  tags$head(HTML("<title> Game Theory Tools By Ethan Holdahl </title>")),
+  tags$head(HTML("<title> Game Theory Tools by Ethan Holdahl </title>")),
 navbarPage(
   title = HTML("Game Theory Tools by <a href='https://ethanholdahl.com'>Ethan Holdahl</a>"),
   tabPanel(
