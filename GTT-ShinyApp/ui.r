@@ -10,7 +10,7 @@ fluidPage(
   #theme = shinytheme("sandstone"),
   tags$head(HTML("<title> Game Theory Tools by Ethan Holdahl </title>")),
 navbarPage(
-  title = HTML("Game Theory Tools by <a href='https://ethanholdahl.com'>Ethan Holdahl</a>"),
+  title = HTML("Game Theory Tools by <a href='https://ethanholdahl.com' style='color:darkgreen'>Ethan Holdahl</a>"),
   tabPanel(
     "Normal Form Games",
     h2("Instructions"),
