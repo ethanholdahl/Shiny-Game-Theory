@@ -1,4 +1,6 @@
 library("tidyverse")
+##### Class Materials #####
+
 #Class Example
 Payoff = tibble(Strat = c(rep("Up", 4), rep("Middle", 4), rep("Down", 4)), 
             ExpectedPayoff = c(8,38/7,38/7,2,5,38/7,17/3,6,3,17/3,17/3,7), 
@@ -56,4 +58,108 @@ ggplot(data = Payoff, aes(x = q, y = ExpectedPayoff, color = Strat, linetype = t
   guides(size = FALSE)+ 
   ggtitle("Expected Payoffs for Player 1's Strategies given Player 2's Choice of q")+
   ylab("Expected Payoff")
+
+##### Code for Generic #####
+
+n_strategies = 5
+payoff_1_strat = c(1,1,3,7,10)
+payoff_2_strat = c(17,17,4,8,9)
+payoff_difference = payoff_2_strat - payoff_1_strat
+p = caracas::symbol('p')
+payoff_expected = list()
+for(i in 1:n_strategies){
+  payoff_expected[[i]] = payoff_1_strat[i] + p * payoff_difference[i]
+}
+first_vector = rep(NA, (n_strategies^2-n_strategies)/2)
+second_vector = rep(NA, (n_strategies^2-n_strategies)/2)
+p_value_vector = rep(NaN, (n_strategies^2-n_strategies)/2)
+i = 0
+for(first in 1:(n_strategies-1)){
+  for(second in (first+1):n_strategies){
+    i = i+1
+    result = caracas::solve_sys(payoff_expected[[first]], payoff_expected[[second]], p)
+    t = try(result[[1]], silent = TRUE)
+    if (inherits(t, "try-error")){
+      p_value = NA 
+    } else {
+      p_value = caracas::as_expr(result[[1]]$p)
+    } 
+    first_vector[i] = first
+    second_vector[i] = second
+    p_value_vector[i] = p_value
+  }
+}
+possible_intersections = tibble(first = first_vector, second = second_vector, p_value = p_value_vector)
+possible_intersections = possible_intersections %>%
+  mutate(inside_range = p_value>=0 & p_value <=1)
+possible_intersections
+
+#identify all unique intersections within the bounds of 0 to 1 and arrange them by p-value from smallest to greatest 
+critical_points = possible_intersections %>%
+  filter(inside_range == TRUE) %>%
+  select(p_value) %>%
+  arrange(p_value) %>%
+  unique() %>%
+  mutate(intersection = TRUE)
+
+#add midpoints
+midpoints = dim(critical_points)[1]-1
+if(midpoints > 0){
+  for(i in 1:midpoints){
+    midpoint_p_value = (critical_points$p_value[i] + critical_points$p_value[i+1])/2
+    critical_points = critical_points %>%
+      add_row(!!! c(p_value = midpoint_p_value, intersection = FALSE))
+  }
+}
+
+#check if endpoints are intersections and add midpoints
+if(!0%in%critical_points$p_value){
+  critical_points = critical_points %>%
+    add_row(!!! c(p_value = 0, intersection = FALSE))
+}
+if(!1%in%critical_points$p_value){
+  critical_points = critical_points %>%
+    add_row(!!! c(p_value = 1, intersection = FALSE))
+}
+critical_points = critical_points %>%
+  arrange(p_value)
+
+critical_points
+
+for(strategy in 1:n_strategies){
+  strategy_payoffs = rep(NA, dim(critical_points)[1])
+  for(i in 1:dim(critical_points)[1]){
+    strategy_payoffs[i] = caracas::as_expr(caracas::subs(payoff_expected[[strategy]], p, critical_points$p_value[i]))
+  }
+  critical_points = critical_points %>%
+    add_column(strategy_payoffs)
+  colnames(critical_points)[2 + strategy] = paste0("strategy_payoffs_", strategy)
+}
+
+
+critical_points = critical_points %>%
+  pivot_longer(!c(p_value,intersection), names_to = "strategy", names_prefix = "strategy_payoffs_", values_to = "payoff")
+
+as.factor(critical_points$strategy)
+
+#add intersection points
+inside_intersections = possible_intersections %>%
+  filter(inside_range == TRUE) %>%
+  select(p_value, first) %>%
+  arrange(p_value) %>%
+  unique() 
+payoff = rep(NA, dim(inside_intersections)[1])
+for(i in 1:dim(inside_intersections)[1]){
+  payoff[i] = caracas::as_expr(caracas::subs(payoff_expected[[inside_intersections$first[i]]], p, inside_intersections$p_value[i]))
+}
+inside_intersections = inside_intersections %>%
+  add_column(payoff)
+
+critical_points
+
+ggplot(data = critical_points) +
+  geom_path(aes(x = p_value, y = payoff, color = strategy), size = 1) +
+  #geom_point(data = inside_intersections, aes(x = p_value, y = payoff), size = 3) + 
+  scale_color_viridis_d(option = "C", end = .95) + 
+  labs(y = "Expected Payoff", x = "p")
 
