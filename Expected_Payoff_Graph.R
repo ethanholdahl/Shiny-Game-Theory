@@ -61,9 +61,9 @@ ggplot(data = Payoff, aes(x = q, y = ExpectedPayoff, color = Strat, linetype = t
 
 ##### Code for Generic #####
 
-n_strategies = 5
-payoff_1_strat = c(1,1,3,7,10)
-payoff_2_strat = c(17,17,4,8,9)
+n_strategies = 2
+payoff_1_strat = c(1,2)
+payoff_2_strat = c(2,0)
 payoff_difference = payoff_2_strat - payoff_1_strat
 p = caracas::symbol('p')
 payoff_expected = list()
@@ -129,18 +129,63 @@ critical_points
 for(strategy in 1:n_strategies){
   strategy_payoffs = rep(NA, dim(critical_points)[1])
   for(i in 1:dim(critical_points)[1]){
-    strategy_payoffs[i] = caracas::as_expr(caracas::subs(payoff_expected[[strategy]], p, critical_points$p_value[i]))
+    t = try(caracas::as_expr(caracas::subs(payoff_expected[[strategy]], p, critical_points$p_value[i])), silent = TRUE)
+    if (inherits(t, "try-error")){
+      #constant
+      strategy_payoffs[i] = caracas::as_expr(payoff_expected[[strategy]])
+    } else {
+      strategy_payoffs[i] = t
+    } 
   }
   critical_points = critical_points %>%
     add_column(strategy_payoffs)
   colnames(critical_points)[2 + strategy] = paste0("strategy_payoffs_", strategy)
 }
 
-
 critical_points = critical_points %>%
   pivot_longer(!c(p_value,intersection), names_to = "strategy", names_prefix = "strategy_payoffs_", values_to = "payoff")
-
+critical_points = critical_points %>%
+  group_by(p_value) %>%
+  mutate(BR = ifelse(payoff == max(payoff), TRUE, FALSE))
 as.factor(critical_points$strategy)
+
+best_response = critical_points %>%
+  filter(BR == TRUE) 
+best_response
+
+BRlist = list()
+p_vals = unique(best_response$p_value)
+for(i in 1:length(p_vals)){
+  BRlist[[i]] = list(p_value = p_vals[i], strategy = best_response$strategy[best_response$p_value==p_vals[i]], payoff = best_response$payoff[best_response$p_value==p_vals[i]][1])
+}
+BRlist
+
+p_value = rep(NA, length(BRlist))
+payoff = rep(NA, length(BRlist))
+strategies = c()
+for(i in 1:length(BRlist)){
+  p_value[i] = BRlist[[i]]$p_value
+  payoff[i] = BRlist[[i]]$payoff
+  strategies = c(strategies, BRlist[[i]]$strategy)
+}
+upper_envelope = tibble(p_value, payoff)
+upper_envelope
+
+if(length(unique(strategies)) == 2){
+  best_response = best_response %>% arrange(strategy) %>% arrange(p_value)
+  if(dim(best_response)[1] == 4){
+    # Z shape. Make sure strategies are together
+    #Else, L shape. No need to fix
+    if(best_response$strategy[1] != best_response$strategy[2]){
+      best_response = best_response %>% arrange(strategy) %>% arrange(desc(p_value))
+    }
+  }
+  best_response = best_response %>% 
+    mutate(q_value = ifelse(strategy == "1", 0, 1)) %>%
+    select(q_value, p_value, payoff, intersection)
+}
+
+
 
 #add intersection points
 inside_intersections = possible_intersections %>%
@@ -150,16 +195,32 @@ inside_intersections = possible_intersections %>%
   unique() 
 payoff = rep(NA, dim(inside_intersections)[1])
 for(i in 1:dim(inside_intersections)[1]){
-  payoff[i] = caracas::as_expr(caracas::subs(payoff_expected[[inside_intersections$first[i]]], p, inside_intersections$p_value[i]))
+  t = try(caracas::as_expr(caracas::subs(payoff_expected[[inside_intersections$first[i]]], p, inside_intersections$p_value[i])), silent = TRUE)
+  if (inherits(t, "try-error")){
+    #constant
+    payoff[i] = caracas::as_expr(payoff_expected[[inside_intersections$first[i]]])
+  } else {
+    payoff[i] = t
+  } 
 }
 inside_intersections = inside_intersections %>%
   add_column(payoff)
 
-critical_points
+#rename strategies
+critical_points$strategy = sub("1", "Left", critical_points$strategy) 
+critical_points$strategy = sub("2", "Right", critical_points$strategy) 
+#critical_points$strategy = sub("1", "Up", critical_points$strategy) 
+#critical_points$strategy = sub("2", "Down", critical_points$strategy) 
 
+
+#1000*700
 ggplot(data = critical_points) +
-  geom_path(aes(x = p_value, y = payoff, color = strategy), size = 1) +
-  #geom_point(data = inside_intersections, aes(x = p_value, y = payoff), size = 3) + 
-  scale_color_viridis_d(option = "C", end = .95) + 
-  labs(y = "Expected Payoff", x = "p")
+  #geom_path(data = upper_envelope, aes(x = p_value, y = payoff), alpha = .5, size = 7, color = "gray") +
+  geom_path(aes(x = p_value, y = payoff, color = strategy), size = 2) +
+  geom_point(data = inside_intersections, aes(x = p_value, y = payoff), size = 6) + 
+  scale_color_viridis_d(option = "C", end = .9) + 
+  labs(y = "Expected Payoff", x = "p", color = "Strategy") +
+  #labs(y = "Expected Payoff", x = "q", color = "Strategy") +
+  theme(text = element_text(size = 30))
+
 
